@@ -1,31 +1,24 @@
 import logging
-from aiogram import Bot, Dispatcher, types, executor, filters
-import json_loader
+from aiogram import Bot, Dispatcher, types, executor
+from module import Bet, Hours, Penalties, Salary, Under_salary
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+from settings import load_token
+from DataBase import db
 
 print("BOT-START: LOADING..")
 
 logging.basicConfig(level=logging.INFO)
-
-bet = json_loader.read_bet()
-
-bot = Bot(token=json_loader.read_token())
+bot = Bot(token=load_token.read_token())
 dp = Dispatcher(bot)
-
 
 
 ALL_COMMANDS = ['/start - Приветствие', 
                 '/help - Помощь',
-                '/write_hours - Добавить часы', 
-                '/read_hours - Посмотреть часы', 
-                '/del_hours - Удалить часы', 
-                '/write_penalties - Добавить штраф', 
-                '/read_penalties - Посмотреть штрафы', 
-                '/del_penalties - Удалить штрафы', 
-                '/write_under_salary - Добавить под зп', 
-                '/read_under_salary - Посмотреть все под зп', 
-                '/del_under_salary - Удалить из под зп', 
+                '/hours - Часы', 
+                '/penalties - Штрафы', 
+                '/under_salary - Под зп',
                 '/salary - Посмотреть расчёт зарплаты',
-                '/bet - Ввести часовую ставку']
+                '/bet - часовая ставка']
 
 HELP = ''
 for com in ALL_COMMANDS:
@@ -37,159 +30,158 @@ print("BOT-START: COMPLETED")
 # команды
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
-    await message.reply("Привет! Я бот, который может помочь тебе с расчётом зарплаты!. Используй /help для просмотра всех команд!")
+    username = (message['from']['username'])
+    db.create_new_user_database(username)
+    await message.reply(f"Привет, {message['from']['first_name']}! Я бот, который может помочь тебе с расчётом зарплаты!. Используй /help для просмотра всех команд!")
 
 
 @dp.message_handler(commands='help')
 async def help(message: types.Message):
     await message.reply(HELP)
 
-# Часы
+# Часы ++
 
-@dp.message_handler(commands='write_hours')
-async def write_hours(message: types.Message):
-    try:
-        value = int(message.text.split()[1])
-        json_loader.write_hours(value = value)
-        await message.reply(f'Записал! Количество отработаных часов: {value}, заработано денег: {value * bet}р.')
+@dp.message_handler(commands='hours')
+async def hours(message: types.Message):
+    await Hours.hours(message)
 
-    except IndexError:
-        await message.reply("Используйте /write_hours value(Кол-во часов).")
 
-    except ValueError:
-        await message.reply("Введите число после команды!")
+@dp.message_handler(lambda message: message.text == 'Добавить часов.')
+async def add_hours_text(message: types.Message):
+    await message.reply('Сколько часов добавляем?: (С помощью команды /add_hours value)')
 
-@dp.message_handler(commands='read_hours')
-async def read_hours(message: types.Message):
-    value = json_loader.read_hours() # ДОПИШИ СУКА
-    await message.reply(f"Количество всего отработаных часов: {value}, всего заработано денег {value * bet}р.")
+@dp.message_handler(commands = 'add_hours')
+async def add_hours_text(message: types.Message):
+    await Hours.write_hours(message)
 
-@dp.message_handler(commands='del_hours')
+
+@dp.message_handler(lambda message: message.text == 'Посмотреть кол-во часов.')
+async def watch_hours(message: types.Message):
+    await Hours.read_hours(message)
+
+
+@dp.message_handler(lambda message: message.text == 'Удалить часы')
 async def del_hours(message: types.Message):
-    try:
-        value = int(message.text.split()[1])
-        json_loader.del_hours(value=value)
-        await message.reply(f'Записал! Удалено часов: {value}.')
+    await message.reply('Сколько часов удаляем?: (С помощью команды /del_hours value)')
 
-    except IndexError:
-        await message.reply("Используйте /del_hours value(Кол-во часов).")
-
-    except ValueError:
-        await message.reply("Введите число после команды!")
+@dp.message_handler(commands = 'del_hours')
+async def del_hours(message: types.Message):
+    await Hours.del_hours(message)
 
 # Штраф
 
-@dp.message_handler(commands='write_penalties')
-async def write_penalties(message: types.Message):
-    try:
-        value = int(message.text.split()[1])
-        json_loader.write_penalties(value = value)
-        await message.reply(f'Записал! добавлено в штраф: {value}р.')
-
-    except IndexError:
-        await message.reply("Используйте /write_penalties value(Штраф).")
-
-    except ValueError:
-        await message.reply("Введите число после команды!")
-
-@dp.message_handler(commands='read_penalties')
-async def read_penalties(message: types.Message):
-    value = json_loader.read_penalties() # ДОПИШИ СУКА
-    await message.reply(f"Сумма штрафов: {value}р.")
-
-@dp.message_handler(commands='del_penalties')
-async def del_penalties(message: types.Message):
-    try:
-        value = int(message.text.split()[1])
-        json_loader.del_penalties(value=value)
-        await message.reply(f'Записал! Удалено из штрафа: {value}р.')
-
-    except IndexError:
-        await message.reply("Используйте /del_penalties value(Штраф)!")
-
-    except ValueError:
-        await message.reply("Введите число после команды!")    
+@dp.message_handler(commands='penalties')
+async def penalties(message: types.Message):
+    await Penalties.penalties(message)
 
 
-# Под ЗП
+@dp.message_handler(lambda message: message.text == 'Добавить штраф.')
+async def add_penalties_text(message):
+    await message.reply("Введите сумму: (С помощью команды /add_penal value)")
 
-@dp.message_handler(commands='write_under_salary')
-async def write_under_salary(message: types.Message):
-    try:
-        item = str(message.text.split()[1]).lower()
-        
-        if item == 'cofe' or item == 'кофе':
-            value = 75
-            json_loader.write_under_salary(item = 'cofe', value = value)
-            await message.reply(f'Записал! Кофе, {value}р под зп.')
-
-        elif item == 'food' or item == 'еда':
-            value = int(message.text.split()[2])
-            json_loader.write_under_salary(item = 'food', value = value)
-            await message.reply(f'Записал! Еда, {value}р под зп.')
-
-        else: 
-            raise IndexError    
-    except IndexError:
-        await message.reply('Используйте /write_sunder_salary (cofe/food) value!')
-
-    except ValueError:
-        await message.reply("Используйте /write_sunder_salary (cofe/food) value!")
+@dp.message_handler(commands='add_penal')
+async def add_penalties(message: types.Message):
+    await Penalties.write_penalties(message)
 
 
-@dp.message_handler(commands='read_under_salary')
+
+@dp.message_handler(lambda message: message.text == 'Посмотреть штрафы.')
+async def watch_penalties(message: types.Message):
+    await Penalties.read_penalties(message)
+    
+
+
+
+@dp.message_handler(lambda message: message.text == 'Удалить штраф.')
+async def del_penalties_text(message):
+     await message.reply("Введите сумму: (С помощью команды /del_penal value)")
+
+@dp.message_handler(commands='del_penal')
+async def add_penalties(message: types.Message):
+    await Penalties.write_penalties(message)
+
+
+
+
+# Под ЗП ++
+
+button1 = KeyboardButton('Кофе')
+button2 = KeyboardButton('Еда')
+cf = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2 )
+
+@dp.message_handler(commands='under_salary')
+async def under_salary(message: types.Message):
+    await Under_salary.under_salary(message)
+
+##
+
+@dp.message_handler(lambda message: message.text == 'Добавить под зп.')
+async def add_under_salary(message: types.Message):
+        await message.answer('Кофе/Еда?', reply_markup=cf)
+
+@dp.message_handler(lambda message: message.text == 'Кофе')
+async def cofe(message: types.Message):
+    await Under_salary.add_under_salary(message, 'кофе')
+
+@dp.message_handler(lambda message: message.text == 'Еда')
+async def food(message: types.Message):
+        await message.reply("Введите сумму: (С помощью команды /add_food value)")
+
+@dp.message_handler(commands='add_food')
+async def sum_food(message: types.Message):
+    value = int(message.text.split()[1])
+    await Under_salary.add_under_salary(message, 'еда', value=value)
+
+##
+
+@dp.message_handler(lambda message: message.text == 'Просмотреть все под зп')
 async def read_under_salary(message: types.Message):
-    cofe, food = json_loader.read_under_salary()
-    await message.reply(f'Всего потрачено {cofe+food}р под зп, из который {cofe}р на кофе и {food}р на еду')
+    await Under_salary.read_under_salary(message)
 
+##
 
-@dp.message_handler(commands='del_under_salary')
+@dp.message_handler(lambda message: message.text == 'Удалить из под зп')
 async def del_under_salary(message: types.Message):
-    try:
-        item = str(message.text.split()[1]).lower()
-        
-        if item == 'cofe' or item == 'кофе':
-            value = 75
-            json_loader.del_under_salary(item = 'cofe', value = value)
-            await message.reply(f'Записал! Удалено кофе из, {value}р под зп.')
+        await message.answer('Кофе/Еда?', reply_markup=cf)
 
-        elif item == 'food' or item == 'еда':
-            value = int(message.text.split()[2])
-            json_loader.del_under_salary(item = 'food', value = value)
-            await message.reply(f'Записал! Удалена еда из, {value}р под зп.')
+@dp.message_handler(lambda message: message.text == 'Кофе')
+async def cofe(message: types.Message):
+    await Under_salary.del_under_salary(message, 'кофе')
 
-        else: 
-            raise IndexError    
-        
-    except IndexError:
-        await message.reply('Используйте /del_sunder_salary (cofe/food) value!')
+@dp.message_handler(lambda message: message.text == 'Еда')
+async def food(message: types.Message):
+        await message.reply("Введите сумму: (С помощью команды /del_food value)")
 
-    except ValueError:
-        await message.reply("Используйте /del_sunder_salary (cofe/food) value!")
+@dp.message_handler(commands='del_food')
+async def sum_food(message: types.Message):
+    value = int(message.text.split()[1])
+    await Under_salary.del_under_salary(message, 'еда', value=value)
 
 
-# Изменение ставки
+
+# Изменение ставки ++
 
 @dp.message_handler(commands='bet')
-async def salary(message: types.Message):
-    try:
-        value = int(message.text.split()[1])
-        json_loader.editing_bet(value=value)
-        await message.reply(f"Ставка изменена на {value}р в час")
-    except IndexError:
-        await message.reply('Используйте /bet value')
+async def bet(message: types.Message):
+    await Bet.bet(message)
 
-    except ValueError:
-        await message.reply("Введите число после команды!")
+@dp.message_handler(lambda message: message.text == "Посмотреть ставку.")
+async def watch_bet(message: types.Message):
+        await Bet.watch_bet(message)
 
+@dp.message_handler(lambda message: message.text == "Изменить ставку.")
+async def edit_bet_text(message: types.Message):
+        await message.reply("Введите новую ставку: (С помощью команды /edit_bet value)")
 
-# Зарплата
+@dp.message_handler(commands='edit_bet')
+async def edit_bet(message: types.Message):
+        await Bet.editing_bet(message)
+
+# Зарплата +
 
 @dp.message_handler(commands='salary')
 async def salary(message: types.Message):
-    hours, bet, penalties, cofe, food= json_loader.load_selery()
-    salary = (hours * bet) - (penalties + cofe + food)
-    await message.reply(f"Отработана часов: {hours}, заработана за часы {hours * bet}р, при ставке {bet}р в час.\nШтраф на сумму: {penalties}р.\nПотрачено всего под зп: {cofe+food}р, из которых {cofe}р на кофе и {food}р на еду.\nОбщая сумма: {salary}р")
+    await Salary.salary(message)
 
 
 @dp.message_handler()
