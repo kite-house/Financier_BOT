@@ -191,4 +191,4 @@ async def unknow_commands(message: types.Message):
 
 if __name__ == '__main__':
     # Запускаем цикл обработки входящих сообщений
-    executor.start_polling(dp, skip_updates=True, )
+    executor.start_polling(dp)
