@@ -64,6 +64,14 @@ async def admin_user_in_database(message: types.Message):
     global state
     state = 'ADMIN_user_in_database'
 
+@dp.message_handler(lambda message: message.text == 'Log')
+async def admin_log(message: types.Message):
+    await message.reply("Времено нет)")
+
+@dp.message_handler(lambda message: message.text == 'CrashLog')
+async def admin_crashlog(message: types.Message):
+    await message.reply("Времено нет)")
+
 # ===
 
 
@@ -231,9 +239,12 @@ async def operation_message(message: types.Message):
                 await Under_salary.del_under_salary(message, 'food', value)
 
     except UnboundLocalError:
-        if state == 'ADMIN_user_in_database':
-            await Admin.admin_user_database(message, message.text)
-        else:
+        try:
+            if state == 'ADMIN_user_in_database':
+                await Admin.admin_user_database(message, message.text)
+            else:
+                await message.reply("Данной команды не существует, используйте /help для просмотра команд")
+        except NameError: 
             await message.reply("Данной команды не существует, используйте /help для просмотра команд")
 
 if __name__ == '__main__':

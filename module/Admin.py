@@ -21,11 +21,11 @@ async def admin(message):
         await message.reply("Увы, но ты не наш! Доступ запрещен!")
         return 0
 
-    button1, button2, button3, button4, button5, button6 = KeyboardButton('DataBase'), KeyboardButton('User in DataBase'),\
-        KeyboardButton('log'), KeyboardButton('CrashLog')
+    button1, button2, button3, button4 = KeyboardButton('DataBase'), KeyboardButton('User in DataBase'),\
+        KeyboardButton('Log'), KeyboardButton('CrashLog')
     
 
-    key_board_mark = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3, button4, button5, button6)
+    key_board_mark = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3, button4)
     await message.answer('Что сделаем?', reply_markup=key_board_mark)
 
 
