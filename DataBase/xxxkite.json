@@ -1,9 +1,9 @@
 {
-    "hours": 0,
+    "hours": 42,
     "under_salary": {
-        "cofe": 0,
-        "food": 0
+        "cofe": 450,
+        "food": 468
     },
-    "penalties": 0,
+    "penalties": 300,
     "bet": 120
 }
