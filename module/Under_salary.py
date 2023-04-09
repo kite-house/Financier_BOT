@@ -5,22 +5,19 @@ from aiogram.types import ReplyKeyboardRemove, \
 from module import under_salary_json
 
 async def under_salary(message):
-    button1 = KeyboardButton('Добавить под зп.')
-    button2 = KeyboardButton('Просмотреть все под зп')
-    button3 = KeyboardButton('Удалить из под зп')
-    kb = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3)
-    await message.answer('Что сделаем?', reply_markup=kb)
+    button1, button2,button3 = KeyboardButton('Добавить под зп.'), KeyboardButton('Просмотреть все под зп'), KeyboardButton('Удалить из под зп')
+    key_board_mark = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3)
+    await message.answer('Что сделаем?', reply_markup=key_board_mark)
 
 
 
-async def add_under_salary(message, item : str, value: int = 0):
+async def add_under_salary(message, item : str, value = 0):
     try:
-        if item == 'cofe' or item == 'кофе':
-            value = 75
-            under_salary_json.write_under_salary(username=message['from']['username'],item = 'cofe', value = value)
+        if item == 'cofe':
+            under_salary_json.write_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
             await message.reply(f'Записал! Кофе, {value}р под зп.')
 
-        elif item == 'food' or item == 'еда':
+        elif item == 'food':
             under_salary_json.write_under_salary(username=message['from']['username'],item = 'food', value = value)
             await message.reply(f'Записал! Еда, {value}р под зп.')
 
@@ -35,17 +32,13 @@ async def read_under_salary(message):
     await message.reply(f'Всего потрачено {cofe+food}р под зп, из который {cofe}р на кофе и {food}р на еду')
 
 
-async def del_under_salary(message):
+async def del_under_salary(message, item : str, value = 0):
     try:
-        item = str(message.text.split()[1]).lower()
-        
-        if item == 'cofe' or item == 'кофе':
-            value = 75
-            under_salary_json.del_under_salary(username=message['from']['username'],item = 'cofe', value = value)
+        if item == 'cofe':
+            under_salary_json.del_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
             await message.reply(f'Записал! Удалено кофе из, {value}р под зп.')
 
-        elif item == 'food' or item == 'еда':
-            value = int(message.text.split()[2])
+        elif item == 'food':
             under_salary_json.del_under_salary(username=message['from']['username'],item = 'food', value = value)
             await message.reply(f'Записал! Удалена еда из, {value}р под зп.')
 

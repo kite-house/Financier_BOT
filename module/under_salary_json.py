@@ -5,46 +5,58 @@ from DataBase import db
 
 
 #Запись в бд
-def write_under_salary(username: str, item: str = None , value: int = 0):
+def add_under_salary(username: str, item: str = None , value: int = 0):
     filename = db.conductor(username)
-    with open(filename, 'r') as file:
-        data = json.load(file)
-        if item == 'cofe':
-            data['under_salary']['cofe'] = data['under_salary']['cofe'] + 75
+    if bool(filename) == True:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            if item == 'cofe':
+                data['under_salary']['cofe'] = data['under_salary']['cofe'] + 75
 
-        elif item == 'food':
-            data['under_salary']['food'] = data['under_salary']['food'] + value
+            elif item == 'food':
+                data['under_salary']['food'] = data['under_salary']['food'] + value
 
-        else:
-            raise SystemError
+            else:
+                raise SystemError
 
-    with open(filename, 'w') as file:
-        json.dump(data, file, indent=4)
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    elif filename == False:
+        add_under_salary(username=username, item=item, value=value)
 
 
 # Прочитать из бд
 def read_under_salary(username: str):
     filename = db.conductor(username)
-    with open(filename, 'r') as file:
-        data = json.load(file)
-        cofe, food = data['under_salary']['cofe'], data['under_salary']['food']
+    if bool(filename) == True:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            cofe, food = data['under_salary']['cofe'], data['under_salary']['food']
 
-    return cofe, food
+        return cofe, food
+
+    elif filename == False:
+        read_under_salary(username=username)
 
 
 #Удаление из бд
 def del_under_salary(username: str, item: str = None , value: int = 0):
     filename = db.conductor(username)
-    with open(filename, 'r') as file:
-        data = json.load(file)
-        if item == 'cofe':
-            data['under_salary']['cofe'] = data['under_salary']['cofe'] - value
+    if bool(filename) == True:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            if item == 'cofe':
+                data['under_salary']['cofe'] = data['under_salary']['cofe'] - value
 
-        elif item == 'food':
-            data['under_salary']['food'] = data['under_salary']['food'] - value
+            elif item == 'food':
+                data['under_salary']['food'] = data['under_salary']['food'] - value
 
-        else:
-            raise SystemError
+            else:
+                raise SystemError
 
-    with open(filename, 'w') as file:
-        json.dump(data, file, indent=4)
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+    
+    elif filename == False:
+        del_under_salary(username=username, item=item, value=value)

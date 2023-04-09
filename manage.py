@@ -1,59 +1,84 @@
-import logging
 from aiogram import Bot, Dispatcher, types, executor
-from module import Bet, Hours, Penalties, Salary, Under_salary
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
+import datetime,time
+
+from module import Bet, Hours, Penalties, Salary, Under_salary, Admin
 from settings import load_token
+from settings.setting import SUPER_USER
 from DataBase import db
-
-print("BOT-START: LOADING..")
-
-logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=load_token.read_token())
 dp = Dispatcher(bot)
 
-
 ALL_COMMANDS = ['/start - Приветствие', 
                 '/help - Помощь',
-                '/hours - Часы', 
-                '/penalties - Штрафы', 
-                '/under_salary - Под зп',
-                '/salary - Посмотреть расчёт зарплаты',
-                '/bet - часовая ставка']
+                'Часы - Управление часами(Добавить/посмотреть/удалить)', 
+                'Штрафы - Управление штрафом(Добавить/посмотреть/удалить)', 
+                'Под зп - Управление подзп(Добавить/посмотреть/удалить)',
+                'Зарплата - Посмотреть рассчёт зп',
+                'Cтавка - Управление ставкой(Добавить/посмотреть)']
 
-HELP = ''
-for com in ALL_COMMANDS:
-    HELP = HELP + com + '\n'
+def HELP(ALL_COMMANDS):
+    HELP = ''
+    for com in ALL_COMMANDS:
+        HELP = HELP + com + '\n'
+    
+    return HELP
 
-
-print("BOT-START: COMPLETED")
-
-# команды
+# FAST COMMANDS
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     username = (message['from']['username'])
     db.create_new_user_database(username)
-    await message.reply(f"Привет, {message['from']['first_name']}! Я бот, который может помочь тебе с расчётом зарплаты!. Используй /help для просмотра всех команд!")
+    hours,penalties,under_salary,salary,bet = KeyboardButton('Часы'), KeyboardButton('Штрафы'), KeyboardButton('Подзп'), KeyboardButton('Зарплата'), KeyboardButton('Ставка')
+    start_rm = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(hours,penalties,under_salary,salary,bet)
+    await message.reply(f"Привет, {message['from']['first_name']}! Я бот, который может помочь тебе с расчётом зарплаты!. Используй /help для просмотра всех команд!", reply_markup=start_rm)
 
 
-@dp.message_handler(commands='help')
+@dp.message_handler(commands=['help'])
 async def help(message: types.Message):
-    await message.reply(HELP)
+    await message.reply(HELP(ALL_COMMANDS))
+
+
+@dp.message_handler(lambda message: message.text == 'Меню')
+async def menu(message: types.Message):
+    hours,penalties,under_salary,salary,bet = KeyboardButton('Часы'), KeyboardButton('Штрафы'), KeyboardButton('Подзп'), KeyboardButton('Зарплата'), KeyboardButton('Ставка')
+    start_rm = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(hours,penalties,under_salary,salary,bet)
+    await message.reply(f'Что выберим?', reply_markup=start_rm)
+
+# SUPERUSER - ADMIN
+
+
+@dp.message_handler(lambda message: message.text == 'Админ')
+async def admin(message: types.Message):
+    await Admin.admin(message)
+
+@dp.message_handler(lambda message: message.text == 'DataBase')
+async def admin_database(message: types.Message):
+    await Admin.admin_database(message)
+
+@dp.message_handler(lambda message: message.text == 'User in DataBase')
+async def admin_user_in_database(message: types.Message):
+    await message.reply("Введите username")
+    global state
+    state = 'ADMIN_user_in_database'
+
+# ===
+
 
 # Часы ++
 
-@dp.message_handler(commands='hours')
+@dp.message_handler(lambda message: message.text == 'Часы')
 async def hours(message: types.Message):
     await Hours.hours(message)
 
 
 @dp.message_handler(lambda message: message.text == 'Добавить часов.')
-async def add_hours_text(message: types.Message):
-    await message.reply('Сколько часов добавляем?: (С помощью команды /add_hours value)')
-
-@dp.message_handler(commands = 'add_hours')
-async def add_hours_text(message: types.Message):
-    await Hours.write_hours(message)
+async def add_hours(message: types.Message):
+    await message.reply('Сколько часов добавляем?: ')
+    global state
+    state = 'add_hours'
 
 
 @dp.message_handler(lambda message: message.text == 'Посмотреть кол-во часов.')
@@ -63,26 +88,22 @@ async def watch_hours(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Удалить часы')
 async def del_hours(message: types.Message):
-    await message.reply('Сколько часов удаляем?: (С помощью команды /del_hours value)')
-
-@dp.message_handler(commands = 'del_hours')
-async def del_hours(message: types.Message):
-    await Hours.del_hours(message)
+    await message.reply('Сколько часов удаляем?: ')
+    global state
+    state = 'del_hours'
 
 # Штраф
 
-@dp.message_handler(commands='penalties')
+@dp.message_handler(lambda message: message.text == 'Штрафы')
 async def penalties(message: types.Message):
     await Penalties.penalties(message)
 
 
 @dp.message_handler(lambda message: message.text == 'Добавить штраф.')
 async def add_penalties_text(message):
-    await message.reply("Введите сумму: (С помощью команды /add_penal value)")
-
-@dp.message_handler(commands='add_penal')
-async def add_penalties(message: types.Message):
-    await Penalties.write_penalties(message)
+    await message.reply("Введите сумму: ")
+    global state 
+    state = 'add_penalties'
 
 
 
@@ -95,22 +116,22 @@ async def watch_penalties(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Удалить штраф.')
 async def del_penalties_text(message):
-     await message.reply("Введите сумму: (С помощью команды /del_penal value)")
-
-@dp.message_handler(commands='del_penal')
-async def add_penalties(message: types.Message):
-    await Penalties.write_penalties(message)
+    await message.reply("Введите сумму: ")
+    global state
+    state = 'del_penalties'
 
 
 
 
 # Под ЗП ++
 
-button1 = KeyboardButton('Кофе')
-button2 = KeyboardButton('Еда')
-cf = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2 )
+button_add_cofe,button_add_food = KeyboardButton('Добавить кофе'), KeyboardButton('Добавить еду')
+button_del_cofe,button_del_food = KeyboardButton('Удалить кофе'), KeyboardButton('Удалить еду')
 
-@dp.message_handler(commands='under_salary')
+add_cofe_food = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button_add_cofe, button_add_food)
+del_cofe_food = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button_del_cofe, button_del_food)
+
+@dp.message_handler(lambda message: message.text == 'Подзп')
 async def under_salary(message: types.Message):
     await Under_salary.under_salary(message)
 
@@ -118,20 +139,18 @@ async def under_salary(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Добавить под зп.')
 async def add_under_salary(message: types.Message):
-        await message.answer('Кофе/Еда?', reply_markup=cf)
+        await message.answer('Кофе/Еда?', reply_markup=add_cofe_food)
 
-@dp.message_handler(lambda message: message.text == 'Кофе')
+@dp.message_handler(lambda message: message.text == 'Добавить кофе')
 async def cofe(message: types.Message):
-    await Under_salary.add_under_salary(message, 'кофе')
+    await Under_salary.add_under_salary(message, 'cofe')
 
-@dp.message_handler(lambda message: message.text == 'Еда')
+@dp.message_handler(lambda message: message.text == 'Добавить еду')
 async def food(message: types.Message):
-        await message.reply("Введите сумму: (С помощью команды /add_food value)")
+    await message.reply("Введите сумму: ")
+    global state
+    state = 'add_under_salary_food'
 
-@dp.message_handler(commands='add_food')
-async def sum_food(message: types.Message):
-    value = int(message.text.split()[1])
-    await Under_salary.add_under_salary(message, 'еда', value=value)
 
 ##
 
@@ -143,51 +162,79 @@ async def read_under_salary(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Удалить из под зп')
 async def del_under_salary(message: types.Message):
-        await message.answer('Кофе/Еда?', reply_markup=cf)
+        await message.answer('Кофе/Еда?', reply_markup=del_cofe_food)
 
-@dp.message_handler(lambda message: message.text == 'Кофе')
+@dp.message_handler(lambda message: message.text == 'Удалить кофе')
 async def cofe(message: types.Message):
-    await Under_salary.del_under_salary(message, 'кофе')
+    await Under_salary.del_under_salary(message, 'cofe')
 
-@dp.message_handler(lambda message: message.text == 'Еда')
+@dp.message_handler(lambda message: message.text == 'Удалить еду')
 async def food(message: types.Message):
-        await message.reply("Введите сумму: (С помощью команды /del_food value)")
-
-@dp.message_handler(commands='del_food')
-async def sum_food(message: types.Message):
-    value = int(message.text.split()[1])
-    await Under_salary.del_under_salary(message, 'еда', value=value)
+    await message.reply("Введите сумму: ")
+    global state
+    state = 'del_under_salary_food'
 
 
 
 # Изменение ставки ++
 
-@dp.message_handler(commands='bet')
+@dp.message_handler(lambda message: message.text == 'Ставка')
 async def bet(message: types.Message):
     await Bet.bet(message)
 
 @dp.message_handler(lambda message: message.text == "Посмотреть ставку.")
 async def watch_bet(message: types.Message):
-        await Bet.watch_bet(message)
+    await Bet.watch_bet(message)
 
 @dp.message_handler(lambda message: message.text == "Изменить ставку.")
 async def edit_bet_text(message: types.Message):
-        await message.reply("Введите новую ставку: (С помощью команды /edit_bet value)")
+    await message.reply("Введите новую ставку: )")
+    global state
+    state = 'edit_bet'
 
-@dp.message_handler(commands='edit_bet')
-async def edit_bet(message: types.Message):
-        await Bet.editing_bet(message)
 
 # Зарплата +
 
-@dp.message_handler(commands='salary')
+@dp.message_handler(lambda message: message.text == 'Зарплата')
 async def salary(message: types.Message):
     await Salary.salary(message)
 
 
 @dp.message_handler()
-async def unknow_commands(message: types.Message):
-    await message.reply("Данной команды не существует, используйте /help для просмотра команд")
+async def operation_message(message: types.Message):
+    try:
+        value = int(message.text)
+    except ValueError:
+        try:
+            value= float(message.text)
+        except ValueError: 
+            pass
+
+    try:
+        if type(value) == int or type(value) == float:
+            if state == 'edit_bet':
+                await Bet.editing_bet(message,value)
+
+            elif state == 'add_hours':
+                await Hours.add_hours(message,value)
+
+            elif state =='del_hours':
+                await Hours.del_hours(message,value)
+
+            elif state == 'add_penalties':
+                await Penalties.add_penalties(message,value)
+            
+            elif state == 'add_under_salary_food':
+                await Under_salary.add_under_salary(message, 'food', value)
+
+            elif state == 'del_under_salary_food':
+                await Under_salary.del_under_salary(message, 'food', value)
+
+    except UnboundLocalError:
+        if state == 'ADMIN_user_in_database':
+            await Admin.admin_user_database(message, message.text)
+        else:
+            await message.reply("Данной команды не существует, используйте /help для просмотра команд")
 
 if __name__ == '__main__':
     # Запускаем цикл обработки входящих сообщений
