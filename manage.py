@@ -1,15 +1,16 @@
 from aiogram import Bot, Dispatcher, types, executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-import datetime,time
+from Logging.logging import Logging
 
 from module import Bet, Hours, Penalties, Salary, Under_salary, Admin
 from settings import load_token
-from settings.setting import SUPER_USER
 from DataBase import db
 
 bot = Bot(token=load_token.read_token())
 dp = Dispatcher(bot)
+
+Logging.start()
 
 ALL_COMMANDS = ['/start - Приветствие', 
                 '/help - Помощь',
@@ -249,4 +250,7 @@ async def operation_message(message: types.Message):
 
 if __name__ == '__main__':
     # Запускаем цикл обработки входящих сообщений
-    executor.start_polling(dp)
+    try:
+        executor.start_polling(dp)
+    except Exception as Error:
+        print(Error)

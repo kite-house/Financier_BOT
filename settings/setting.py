@@ -1,6 +1,3 @@
-import datetime
-
-
 DEBUG = True
 
 SUPER_USER = ['xxxkite']
