@@ -3,6 +3,7 @@ from settings.setting import SUPER_USER
 
 from module import admin_json
 from Logging.logging import Logging
+from Logging.logging import logfile, crashlogfile
 
 def accept_admin(message):
     accept = False
@@ -58,6 +59,31 @@ async def admin_user_database(message, user):
     elif user_database == False:
         await message.reply('Пользователь не найден!')
         Logging.action('ADMIN_WATCH_USER', 'DATABASE', 'FAIL')
+
+async def admin_log(message):
+    accept = accept_admin(message)
+    if accept == False:
+        await message.reply("Доступ запрещен!")
+        return 0
+    
+    with open(logfile, 'r') as file:
+        data = file.read()
+        await message.reply(data)
+        file.close()
+        Logging.action("ADMIN_WATCH", 'LOG', 'SUCCES')
+
+async def admin_crash_log(message):
+    accept = accept_admin(message)
+    if accept == False:
+        await message.reply("Доступ запрещен!")
+        return 0
+    
+    with open(crashlogfile, 'r') as file:
+        data = file.read()
+        await message.reply(data)
+        file.close()
+        Logging.action("ADMIN_WATCH", 'CRASH-LOG', 'SUCCES')
+
     
     
 

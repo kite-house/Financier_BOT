@@ -7,7 +7,7 @@ from module import Bet, Hours, Penalties, Salary, Under_salary, Admin
 from settings import load_token
 from DataBase import db
 
-bot = Bot(token=load_token.read_token())
+bot = Bot(token=load_token.api_token())
 dp = Dispatcher(bot)
 
 Logging.start()
@@ -67,11 +67,11 @@ async def admin_user_in_database(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Log')
 async def admin_log(message: types.Message):
-    await message.reply("Времено нет)")
+    await Admin.admin_log(message)
 
 @dp.message_handler(lambda message: message.text == 'CrashLog')
 async def admin_crashlog(message: types.Message):
-    await message.reply("Времено нет)")
+    await Admin.admin_crash_log(message)
 
 # ===
 
@@ -249,8 +249,7 @@ async def operation_message(message: types.Message):
             await message.reply("Данной команды не существует, используйте /help для просмотра команд")
 
 if __name__ == '__main__':
-    # Запускаем цикл обработки входящих сообщений
     try:
         executor.start_polling(dp)
     except Exception as Error:
-        print(Error)
+        Logging.crash_report(Error)
