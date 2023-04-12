@@ -22,7 +22,7 @@ def conductor(username):
     database = os.listdir(path=dir_database)
     for file in database:
         if file == filename:
-            filename = f'{dir_database}\{username}.json'
+            filename = f'{username}.json'
             return filename
 
     create_new_user_database(username=username)
