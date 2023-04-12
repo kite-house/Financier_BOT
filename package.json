@@ -2,7 +2,7 @@
     "name": "financier_bot",
     "version": "1.0.0",
     "description": "Building package.JSON",
-    "main": "manage.py",
+    "main": "py manage.py",
     "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1"
     },
