@@ -1,0 +1,11 @@
+{
+    "name": "financier_bot",
+    "version": "1.0.0",
+    "description": "Building package.JSON",
+    "main": "manage.py",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "kite_studio_dev",
+    "license": "ISC"
+  }
