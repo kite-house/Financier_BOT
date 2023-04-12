@@ -199,7 +199,7 @@ async def watch_bet(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == "Изменить ставку.")
 async def edit_bet_text(message: types.Message):
-    await message.reply("Введите новую ставку: )")
+    await message.reply("Введите новую ставку: ")
     global state
     state = 'edit_bet'
 

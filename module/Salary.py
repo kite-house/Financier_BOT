@@ -33,11 +33,11 @@ async def salary(message, value, datetime = datetime):
         hours, bet, penalties, cofe, food = salary_json.load_selery(username=message['from']['username'], datetime = datetime)
         salary = (hours * bet) - (penalties + cofe + food)
         await message.reply(f"Зарплата за {month_str[datetime]}: \
-                            \n=========================================================\
-                            \nОтработана часов: {hours}, заработана за часы {hours * bet}р, при ставке {bet}р в час. \
-                            \nШтраф на сумму: {penalties}р.\nПотрачено всего под зп: {cofe+food}р, из которых {cofe}р на кофе и {food}р на еду. \
-                            \nОбщая сумма: {salary}р \
-                            \n=========================================================")
+                            \n===========================\
+                            \nОтработана часов: {hours}, заработана за часы {hours * bet}р, при ставке {bet}р в час.\
+                            \nШтраф на сумму: {penalties}р.\nПотрачено всего под зп: {cofe+food}р, из которых {cofe}р на кофе и {food}р на еду.\
+                            \nОбщая сумма: {salary}р\
+                            \n===========================")
         Logging.action("WATCH", 'SALARY', 'SUCCES')
     except Exception:
         await message.reply("Данные не найдены!")

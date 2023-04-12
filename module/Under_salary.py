@@ -14,7 +14,7 @@ async def add_under_salary(message, item : str, value = 0):
     try:
         if item == 'cofe':
             under_salary_json.add_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
-            await message.reply(f'Записал! Кофе, {value}р под зп.')
+            await message.reply(f'Записал! Кофе, 75р под зп.')
             Logging.action("ADD", 'UNDER_SALARY(COFE)', 'SUCCES')
 
         elif item == 'food':
@@ -38,7 +38,7 @@ async def del_under_salary(message, item : str, value = 0):
     try:
         if item == 'cofe':
             under_salary_json.del_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
-            await message.reply(f'Записал! Удалено кофе из, {value}р под зп.')
+            await message.reply(f'Записал! Удалено кофе из, 75р под зп.')
             Logging.action("DELETE", 'UNDER_SALARY(COFE)', 'SUCCES')
 
         elif item == 'food':
