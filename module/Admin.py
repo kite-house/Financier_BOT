@@ -3,7 +3,7 @@ from settings.setting import SUPER_USER
 
 from module import admin_json
 from Logging.logging import Logging
-from Logging.logging import logfile, crashlogfile
+from Logging.logging import logfile
 
 def accept_admin(message):
     accept = False
@@ -23,10 +23,10 @@ async def admin(message):
         await message.reply("Увы, но ты не наш! Доступ запрещен!")
         return 0
 
-    button1, button2, button3, button4 = KeyboardButton('DataBase'), KeyboardButton('User in DataBase'),\
-        KeyboardButton('Log'), KeyboardButton('CrashLog')
+    button1, button2, button3 = KeyboardButton('DataBase'), KeyboardButton('User in DataBase'),\
+        KeyboardButton('Log')
 
-    key_board_mark = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3, button4)
+    key_board_mark = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(button1, button2, button3)
     await message.answer('Что сделаем?', reply_markup=key_board_mark)
 
 
@@ -71,18 +71,6 @@ async def admin_log(message):
         await message.reply(data)
         file.close()
         Logging.action("ADMIN_WATCH", 'LOG', 'SUCCES')
-
-async def admin_crash_log(message):
-    accept = accept_admin(message)
-    if accept == False:
-        await message.reply("Доступ запрещен!")
-        return 0
-    
-    with open(crashlogfile, 'r') as file:
-        data = file.read()
-        await message.reply(data)
-        file.close()
-        Logging.action("ADMIN_WATCH", 'CRASH-LOG', 'SUCCES')
 
     
     

@@ -1,9 +1,20 @@
 {
-    "hours": 24.12,
-    "under_salary": {
-        "cofe": 0,
-        "food": 0
+    "3": {
+        "hours": 1000,
+        "under_salary": {
+            "cofe": 0,
+            "food": 0
+        },
+        "penalties": 0,
+        "bet": 110
     },
-    "penalties": 0,
-    "bet": 110
+    "4": {
+        "hours": 26.12,
+        "under_salary": {
+            "cofe": 0,
+            "food": 0
+        },
+        "penalties": 0,
+        "bet": 110
+    }
 }

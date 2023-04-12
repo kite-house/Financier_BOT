@@ -1,6 +1,4 @@
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from module import under_salary_json
 from Logging.logging import Logging
@@ -15,12 +13,12 @@ async def under_salary(message):
 async def add_under_salary(message, item : str, value = 0):
     try:
         if item == 'cofe':
-            under_salary_json.write_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
+            under_salary_json.add_under_salary(username=message['from']['username'],item = 'cofe', value = 75)
             await message.reply(f'Записал! Кофе, {value}р под зп.')
             Logging.action("ADD", 'UNDER_SALARY(COFE)', 'SUCCES')
 
         elif item == 'food':
-            under_salary_json.write_under_salary(username=message['from']['username'],item = 'food', value = value)
+            under_salary_json.add_under_salary(username=message['from']['username'],item = 'food', value = value)
             await message.reply(f'Записал! Еда, {value}р под зп.')
             Logging.action("ADD", 'UNDER_SALARY(FOOD)', 'SUCCES')
 

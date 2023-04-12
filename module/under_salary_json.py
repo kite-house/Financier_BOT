@@ -1,6 +1,7 @@
 import json
 
 from DataBase import db
+from datetime import datetime
 # Под зпшки
 
 
@@ -11,10 +12,10 @@ def add_under_salary(username: str, item: str = None , value: int = 0):
         with open(filename, 'r') as file:
             data = json.load(file)
             if item == 'cofe':
-                data['under_salary']['cofe'] = data['under_salary']['cofe'] + 75
+                data[str(datetime.now().month)]['under_salary']['cofe'] = data[str(datetime.now().month)]['under_salary']['cofe'] + 75
 
             elif item == 'food':
-                data['under_salary']['food'] = data['under_salary']['food'] + value
+                data[str(datetime.now().month)]['under_salary']['food'] = data[str(datetime.now().month)]['under_salary']['food'] + value
 
             else:
                 raise SystemError
@@ -32,7 +33,7 @@ def read_under_salary(username: str):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            cofe, food = data['under_salary']['cofe'], data['under_salary']['food']
+            cofe, food = data[str(datetime.now().month)]['under_salary']['cofe'], data[str(datetime.now().month)]['under_salary']['food']
 
         return cofe, food
 
@@ -47,10 +48,10 @@ def del_under_salary(username: str, item: str = None , value: int = 0):
         with open(filename, 'r') as file:
             data = json.load(file)
             if item == 'cofe':
-                data['under_salary']['cofe'] = data['under_salary']['cofe'] - value
+                data[str(datetime.now().month)]['under_salary']['cofe'] = data[str(datetime.now().month)]['under_salary']['cofe'] - value
 
             elif item == 'food':
-                data['under_salary']['food'] = data['under_salary']['food'] - value
+                data[str(datetime.now().month)]['under_salary']['food'] = data[str(datetime.now().month)]['under_salary']['food'] - value
 
             else:
                 raise SystemError

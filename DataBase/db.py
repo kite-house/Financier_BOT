@@ -56,3 +56,4 @@ def add_new_month_in_db():
 
         except IndexError:
             pass
+    Logging.system('ADD_NEW_MONTH', 'DATABASE', 'SUCCES')

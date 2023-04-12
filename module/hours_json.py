@@ -1,5 +1,6 @@
 import json
 from DataBase import db
+from datetime import datetime
 
 # Часы
 
@@ -9,7 +10,7 @@ def read_hours(username: str):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            hours = data['hours']
+            hours = data[str(datetime.now().month)]['hours']
 
         return hours
     if filename == False:
@@ -21,7 +22,7 @@ def add_hours(username: str, value: int = 0):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            data['hours'] = data['hours'] + value
+            data[str(datetime.now().month)]['hours'] = data[str(datetime.now().month)]['hours'] + value
         
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)
@@ -35,7 +36,7 @@ def del_hours(username: str, value: int = 0):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            data['hours'] = data['hours'] - value
+            data[str(datetime.now().month)]['hours'] = data[str(datetime.now().month)]['hours'] - value
         
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)

@@ -1,6 +1,6 @@
 import json
 from DataBase import db
-
+from datetime import datetime
 # Часовая ставка
 
 
@@ -10,7 +10,7 @@ def read_bet(username: str):
     if bool(filename) == True:  
         with open(filename, 'r') as file:
             data = json.load(file)
-            bet = data['bet']
+            bet = data[str(datetime.now().month)]['bet']
 
         return bet
     
@@ -24,7 +24,7 @@ def editing_bet(username: str, value: int = 0):
     if filename != False:
         with open(filename, 'r') as file:
             data = json.load(file)
-            data['bet'] = value
+            data[str(datetime.now().month)]['bet'] = value
 
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)

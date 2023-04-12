@@ -1,6 +1,7 @@
 import json
 
 from DataBase import db
+from datetime import datetime
 # Штрафы
 
 
@@ -10,7 +11,7 @@ def read_penalties(username: str):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            hours = data['penalties']
+            hours = data[str(datetime.now().month)]['penalties']
 
         return hours
     
@@ -23,7 +24,7 @@ def add_penalties(username: str, value: int = 0):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            data['penalties'] = data['penalties'] + value
+            data[str(datetime.now().month)]['penalties'] = data[str(datetime.now().month)]['penalties'] + value
         
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)
@@ -37,7 +38,7 @@ def del_penalties(username: str, value: int = 0):
     if bool(filename) == True:
         with open(filename, 'r') as file:
             data = json.load(file)
-            data['penalties'] = data['penalties'] - value
+            data[str(datetime.now().month)]['penalties'] = data[str(datetime.now().month)]['penalties'] - value
         
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)

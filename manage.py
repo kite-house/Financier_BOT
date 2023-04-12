@@ -27,6 +27,7 @@ def HELP(ALL_COMMANDS):
     
     return HELP
 
+
 # FAST COMMANDS
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
@@ -69,9 +70,10 @@ async def admin_user_in_database(message: types.Message):
 async def admin_log(message: types.Message):
     await Admin.admin_log(message)
 
-@dp.message_handler(lambda message: message.text == 'CrashLog')
-async def admin_crashlog(message: types.Message):
-    await Admin.admin_crash_log(message)
+@dp.message_handler(commands='datetime')
+async def date_time(message: types.Message):
+    from datetime import datetime
+    await message.reply(datetime.today().replace(microsecond=0))
 
 # ===
 
@@ -206,7 +208,21 @@ async def edit_bet_text(message: types.Message):
 
 @dp.message_handler(lambda message: message.text == 'Зарплата')
 async def salary(message: types.Message):
-    await Salary.salary(message)
+    await Salary.hi_salary(message)
+
+@dp.message_handler(lambda message: message.text == 'Зарплата за текущий месяц.')
+async def salary(message: types.Message):
+    await Salary.salary(message, value = 0)
+
+@dp.message_handler(lambda message: message.text == 'Зарплата за прошлый месяц.')
+async def salary(message: types.Message):
+    await message.reply("Введите номер месяца: ")
+    global state 
+    state = 'salary_find_month'
+
+def delete_state():
+    global state
+    state = ''
 
 
 @dp.message_handler()
@@ -223,33 +239,45 @@ async def operation_message(message: types.Message):
         if type(value) == int or type(value) == float:
             if state == 'edit_bet':
                 await Bet.editing_bet(message,value)
+                delete_state()
 
             elif state == 'add_hours':
                 await Hours.add_hours(message,value)
+                delete_state()
 
             elif state =='del_hours':
                 await Hours.del_hours(message,value)
+                delete_state()
 
             elif state == 'add_penalties':
                 await Penalties.add_penalties(message,value)
+                delete_state()
+
+            elif state == 'del_penalties':
+                await Penalties.del_penalties(message, value)
+                delete_state()
             
             elif state == 'add_under_salary_food':
                 await Under_salary.add_under_salary(message, 'food', value)
+                delete_state()
 
             elif state == 'del_under_salary_food':
                 await Under_salary.del_under_salary(message, 'food', value)
+                delete_state()
+
+            elif state == 'salary_find_month':
+                await Salary.salary(message, value)
+                delete_state()
 
     except UnboundLocalError:
         try:
             if state == 'ADMIN_user_in_database':
                 await Admin.admin_user_database(message, message.text)
+                delete_state()
             else:
                 await message.reply("Данной команды не существует, используйте /help для просмотра команд")
         except NameError: 
             await message.reply("Данной команды не существует, используйте /help для просмотра команд")
 
 if __name__ == '__main__':
-    try:
-        executor.start_polling(dp)
-    except Exception as Error:
-        Logging.crash_report(Error)
+    executor.start_polling(dp)
