@@ -2,7 +2,7 @@ import datetime
 
 DEBUG = False
 
-SUPER_USER = ['xxxkite']
+SUPER_USER = ['']
 
 
 data = {
